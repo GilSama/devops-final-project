@@ -1,0 +1,71 @@
+# ---------- שלב 1: בניית האפליקציה ----------
+FROM ubuntu:22.04 AS builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# התקנת node
+RUN apt-get update && \
+    apt-get install -y curl ca-certificates gnupg && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean
+
+# תיקיית עבודה
+WORKDIR /app
+
+# העתקת קבצי הפרויקט
+COPY package*.json ./
+
+# התקנת חבילות
+RUN npm install
+
+# העתקת שאר הקוד
+COPY . .
+
+# build לריאקט
+RUN npm run build
+
+
+# ---------- שלב 2: שרת פרודקשן ----------
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# התקנת nginx
+RUN apt-get update && \
+    apt-get install -y nginx && \
+    apt-get clean
+    
+# יצירת משתמש לא-אדמין
+RUN useradd -m devopsuser
+
+# צריך והרשאות nginx -יצירת תיקיות ש
+RUN mkdir -p /var/www/html \
+    /var/log/nginx \
+    /var/lib/nginx \
+    /run/nginx && \
+    chown -R devopsuser:devopsuser /var/www/html \
+    /var/log/nginx \
+    /var/lib/nginx \
+    /run/nginx
+
+# מחיקת האתר הדיפולטי
+RUN rm -rf /var/www/html/*
+
+# העתקת קבצי build
+COPY --from=builder /app/build /var/www/html
+
+# העתקת קובץ קונפיג מותאם
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# תיקיית נתונים
+RUN mkdir -p /app/data && chown -R devopsuser:devopsuser /app/data
+
+# מעבר למשתמש הרגיל
+USER devopsuser
+
+# פתיחת פורט
+EXPOSE 80
+
+# הפעלת nginx
+CMD ["nginx", "-g", "daemon off;"]
