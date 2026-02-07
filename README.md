@@ -18,6 +18,7 @@ devops-final-project
 
 ## ✿ Running Instructions:
 type the following commands in the console (ctrl j):
+
 1. `npm install` - install all the node modules needed.
 
 2. `npm start` - runs the server and opens the app in the web.
@@ -25,3 +26,14 @@ type the following commands in the console (ctrl j):
 3. thats it! :D.
 
 ദ്ദി > ⩊ < .ᐟ
+
+## ✿ Deployment Instructions:
+type the following commands in the console (ctrl j):
+
+1. `docker build -t react-devops .` - builds the image
+
+2. `docker run -p 8080:80 -v %cd%/data:/app/data react-devops` - runs the container (with persistent storage (Volumes)).
+
+3. COMPLETE!! ◝(ᵔᗜᵔ)◜𓏲 ๋࣭ ࣪ ˖
+
+
